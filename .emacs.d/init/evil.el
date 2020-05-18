@@ -79,10 +79,13 @@ TYPE is either a state or one of `inner', `outer', `window',
 
    ;; move cursor visually by default
    (swap motion  "j" "gj"  "k" "gk")
+   (swap normal  "a" "A"  "s" "P")
 
    ;; use C-j instead of J because we override J by `evil-scroll-down'
    (normal "J"   nil
-           "C-j" evil-join)
+           "o"   other-window
+           "C-j" evil-join
+           "C-m" newline)
    (motion "J"   evil-scroll-down
            "K"   evil-scroll-up)
 
@@ -97,10 +100,22 @@ TYPE is either a state or one of `inner', `outer', `window',
    (window "f d" delete-frame)
 
    ;; use default emacs key bindings
+   (delete normal "C-a" "C-e" "C-f" "C-b")
    (delete insert "C-e" "C-y" "C-k" "C-n" "C-p" "C-t" "C-d")
    (delete ex     "C-a" "C-b")
 
    ) ;; evil-define-keys
+
+  ;; C-g can use as ESCAPE
+  (defun evil-escape-or-quit (&optional prompt)
+  (interactive)
+  (cond
+   ((or (evil-normal-state-p) (evil-insert-state-p)
+        (evil-replace-state-p) (evil-visual-state-p)) [escape])
+   (t (kbd "C-g"))))
+
+  (define-key key-translation-map (kbd "C-g") #'evil-escape-or-quit)
+  (define-key evil-operator-state-map (kbd "C-g") #'evil-escape-or-quit)
 
   ;; C-p and C-n works as both Emacs and Evil command
   (defadvice evil-paste-pop (around evil-paste-or-move-line activate)
